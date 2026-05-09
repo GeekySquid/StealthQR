@@ -7,8 +7,12 @@
   },
   "rewrites": [
     {
+      "source": "/api/share",
+      "destination": "/api/share.ts"
+    },
+    {
       "source": "/api/(.*)",
-      "destination": "/api/index"
+      "destination": "/api/index.ts"
     },
     {
       "source": "/((?!api/).*)",
