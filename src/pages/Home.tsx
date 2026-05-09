@@ -109,14 +109,22 @@ export default function Home() {
       });
       
       if (!res.ok) {
-         const data = await res.json();
-         setError("Failed to register share: " + (data.error || "Unknown"));
+         let errorMessage = "Unknown error";
+         try {
+           const data = await res.json();
+           errorMessage = data.error || data.details || JSON.stringify(data);
+         } catch (parseError) {
+           // If not JSON, it might be HTML error from Vercel
+           const textError = await res.text();
+           errorMessage = textError.substring(0, 300); // Limit length
+         }
+         setError("Server Error (" + res.status + "): " + errorMessage);
          return;
       }
       
       startUpload(file, uuid);
     } catch(e: any) {
-      setError("Network error: " + e.message);
+      setError("Uplink Error: " + e.message);
     }
   };
 
