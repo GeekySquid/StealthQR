@@ -1,0 +1,6 @@
+{
+  "name": "StealthQR",
+  "description": "High-performance, secure file-sharing PWA built with React, Vite, and Express capable of streaming GBs sized files securely.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
