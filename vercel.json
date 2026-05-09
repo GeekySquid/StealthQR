@@ -2,8 +2,16 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/share/:id/auth",
+      "destination": "/api/share/[id]/auth.ts"
+    },
+    {
       "source": "/api/share/:id",
       "destination": "/api/share/[id].ts"
+    },
+    {
+      "source": "/api/download/:id",
+      "destination": "/api/download/[id].ts"
     },
     {
       "source": "/api/:path*",
