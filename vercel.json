@@ -2,11 +2,11 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/share",
-      "destination": "/api/share.ts"
+      "source": "/api/share/:id",
+      "destination": "/api/share/[id].ts"
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "/api/index.ts"
     },
     {
