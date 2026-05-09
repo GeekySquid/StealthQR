@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Use POST');
 
@@ -6,10 +8,16 @@ export default async function handler(req, res) {
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    return res.status(200).json({ error: "Missing Env Vars on Vercel" });
+    return res.status(500).json({ error: "Missing Supabase configuration on Vercel" });
   }
 
   try {
+    let password_hash = null;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      password_hash = await bcrypt.hash(password, salt);
+    }
+
     const response = await fetch(`${SUPABASE_URL}/rest/v1/shares`, {
       method: "POST",
       headers: {
@@ -18,13 +26,22 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${SUPABASE_KEY}`
       },
       body: JSON.stringify({
-        id, file_path: id, file_name, size, content_type, password_hash: password // Plain for now
+        id, 
+        file_path: id, 
+        file_name, 
+        size, 
+        content_type, 
+        password_hash
       })
     });
 
-    if (!response.ok) return res.status(200).json({ error: await response.text() });
+    if (!response.ok) {
+      const err = await response.text();
+      return res.status(500).json({ error: "Database Error", details: err });
+    }
+
     return res.status(201).json({ success: true });
-  } catch (e) {
-    return res.status(200).json({ error: e.message });
+  } catch (e: any) {
+    return res.status(500).json({ error: "Internal Server Error", details: e.message });
   }
 }
