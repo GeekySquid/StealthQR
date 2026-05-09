@@ -130,6 +130,20 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", environment: process.env.NODE_ENV, vercel: process.env.VERCEL });
 });
 
+app.get("/api/debug-url", (req, res) => {
+  res.json({ 
+    url: req.url, 
+    originalUrl: req.originalUrl,
+    path: req.path,
+    params: req.params,
+    query: req.query,
+    headers: {
+      host: req.headers.host,
+      "x-forwarded-for": req.headers["x-forwarded-for"]
+    }
+  });
+});
+
 // Verify password and get temporary token
 app.post("/api/share/:id/auth", async (req, res) => {
    try {
