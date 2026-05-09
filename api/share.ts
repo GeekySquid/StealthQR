@@ -14,8 +14,9 @@ export default async function handler(req, res) {
   try {
     let password_hash = null;
     if (password) {
+      const trimmedPassword = String(password).trim();
       const salt = await bcrypt.genSalt(10);
-      password_hash = await bcrypt.hash(password, salt);
+      password_hash = await bcrypt.hash(trimmedPassword, salt);
     }
 
     const response = await fetch(`${SUPABASE_URL}/rest/v1/shares`, {

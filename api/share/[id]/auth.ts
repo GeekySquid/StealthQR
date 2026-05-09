@@ -12,6 +12,9 @@ export default async function handler(req, res) {
   if (!id) return res.status(400).json({ error: "Missing ID" });
 
   try {
+    const trimmedPassword = password ? String(password).trim() : "";
+    console.log(`[Auth] Checking share: ${id}`);
+
     // 1. Fetch share record from database
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/shares?id=eq.${id}&select=*`,
@@ -33,10 +36,13 @@ export default async function handler(req, res) {
 
     // 2. Verify password if required
     if (share.password_hash) {
-       if (!password) {
+       if (!trimmedPassword) {
           return res.status(401).json({ error: "Password required" });
        }
-       const isMatch = await bcrypt.compare(password, share.password_hash);
+       
+       const isMatch = await bcrypt.compare(trimmedPassword, share.password_hash);
+       console.log(`[Auth] Comparison result: ${isMatch}`);
+       
        if (!isMatch) {
           return res.status(401).json({ error: "Invalid password" });
        }
