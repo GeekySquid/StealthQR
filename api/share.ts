@@ -1,3 +1,2 @@
-console.log("[Vercel API] Entry point hit");
 import { app } from '../server';
 export default app;
