@@ -1,5 +1,5 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
+// import { createServer as createViteServer } from "vite"; // Moved to dynamic import
 import path from "path";
 import { Readable } from "stream";
 import { fileURLToPath } from 'url';
@@ -70,9 +70,15 @@ app.use(express.json());
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && process.env.VERCEL !== "1") {
    startCleanupJob(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 }
+
+// Debug logger
+app.use((req, res, next) => {
+  console.log(`[Express] ${req.method} ${req.url}`);
+  next();
+});
 
 // API Route to Create Share Record securely
 app.post("/api/share", async (req, res) => {
@@ -117,6 +123,11 @@ app.post("/api/share", async (req, res) => {
     console.error("Create share error:", e);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+// Health check route
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", environment: process.env.NODE_ENV, vercel: process.env.VERCEL });
 });
 
 // Verify password and get temporary token
@@ -282,11 +293,17 @@ app.get("/api/download/:id", async (req, res) => {
   }
 });
 
+// Catch-all API 404
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: `Route ${req.method} ${req.url} not found in Express app` });
+});
+
 async function startServer() {
   const PORT = process.env.PORT || 3000;
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
